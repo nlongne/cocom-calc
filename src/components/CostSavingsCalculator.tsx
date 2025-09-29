@@ -330,7 +330,7 @@ function ExportButtons({data, totals}:{data:Record<CategoryKey, CategoryInputs>,
       }),
       ["TOTALS","","","", "", (totals.monthlySavings).toString(), (totals.annualSavings).toString(), "", (totals.lifetimeSavings).toString(), (totals.oneTime).toString()],
     ];
-    const csv = rows.map(r=> r.join(",")).join("\n");
+    const csv = rows.map((r) => r.join(",")).join("\n");
     const blob = new Blob([csv],{type:"text/csv;charset=utf-8;"});
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
