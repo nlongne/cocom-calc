@@ -17,27 +17,36 @@ const BRAND = {
   blueTint: "#e6ecf5",
 };
 
+// ---------- Helpers ----------
 const currency = (n:number) => n.toLocaleString(undefined,{ style:"currency", currency:"USD", maximumFractionDigits: 0 });
 const pct = (n:number) => `${(n*100).toFixed(1)}%`;
 
-export type CategoryKey = "isp" | "voip" | "wifi" | "access" | "cloud" | "mobile";
+// unified category model
+export type CategoryKey =
+  | "isp"
+  | "voip"
+  | "wifi"
+  | "access"
+  | "cloud"
+  | "mobile";
 
 const CATEGORY_LABELS: Record<CategoryKey,string> = {
   isp: "Contract & ISP Negotiation",
   voip: "VoIP & Phone Cost Optimization",
-  wifi: "Wi-Fi Infrastructure Audits",
+  wifi: "Wi‑Fi Infrastructure Audits",
   access: "Access Control & Security Systems",
   cloud: "Cloud & Licensing Review",
   mobile: "Mobile & Connectivity Plans",
 };
 
+// default inputs per category
 export type CategoryInputs = {
-  mode: "flat" | "perUnit";
-  units: number;
-  currentMonthly: number;
-  proposedMonthly: number;
-  oneTimeCost: number;
-  termMonths: number;
+  mode: "flat" | "perUnit"; // flat = monthly totals, perUnit = units * rate
+  units: number;              // dwellings, seats, lines, devices, etc.
+  currentMonthly: number;     // if mode=flat, this is the total monthly; if perUnit, this is current rate per unit
+  proposedMonthly: number;    // if mode=flat, this is the total monthly; if perUnit, this is proposed rate per unit
+  oneTimeCost: number;        // any upfront project cost (CPE, install, conversion, hardware)
+  termMonths: number;         // term to show lifetime savings for ISP / contracts
 };
 
 const DEFAULTS: Record<CategoryKey, CategoryInputs> = {
@@ -66,6 +75,7 @@ function computeKPIs(i: CategoryInputs){
   return { current, proposed, monthlySavings: savings, annualSavings: annual, lifetimeSavings: lifetime, roi, paybackMonths, reduction };
 }
 
+// ---------- UI building blocks ----------
 function NumberField({ id, label, value, onChange, min=0, step=1, suffix }:{
   id:string; label:string; value:number; onChange:(n:number)=>void; min?:number; step?:number; suffix?:string;
 }){
@@ -99,8 +109,11 @@ function ModeToggle({checked, onCheckedChange}:{checked:boolean; onCheckedChange
   );
 }
 
+// ---------- Category Card ----------
 function CategoryCard({ k, inputs, onChange }:{
-  k: CategoryKey; inputs: CategoryInputs; onChange: (next: CategoryInputs)=>void;
+  k: CategoryKey;
+  inputs: CategoryInputs;
+  onChange: (next: CategoryInputs)=>void;
 }){
   const kpis = useMemo(()=> computeKPIs(inputs), [inputs]);
   const isPerUnit = inputs.mode === "perUnit";
@@ -174,6 +187,7 @@ function CategoryCard({ k, inputs, onChange }:{
   );
 }
 
+// ---------- Main Component ----------
 export default function CostSavingsCalculator(){
   const [data, setData] = useState<Record<CategoryKey, CategoryInputs>>(()=>{
     const cached = typeof window !== "undefined" ? localStorage.getItem("cocom_calc_v1") : null;
@@ -198,11 +212,11 @@ export default function CostSavingsCalculator(){
     return { current, proposed, monthlySavings, annualSavings, lifetimeSavings, oneTime };
   }, [data]);
 
-  const chartData = useMemo(()=>(
-    (Object.keys(data) as CategoryKey[])
-      .map((k)=>({ name: CATEGORY_LABELS[k], value: computeKPIs(data[k]).annualSavings, key: k }))
-      .filter(d=>d.value>0)
-  ), [data]);
+  const chartData = useMemo(()=>{
+    return (Object.keys(data) as CategoryKey[]).map((k)=>(
+      { name: CATEGORY_LABELS[k], value: computeKPIs(data[k]).annualSavings, key: k }
+    )).filter(d=>d.value>0);
+  }, [data]);
 
   const COLORS = [BRAND.blue, "#2f5ea5", "#7aa2d2", "#5a8cc4", "#9ab7dc", "#c5d6ec"];
 
@@ -212,7 +226,7 @@ export default function CostSavingsCalculator(){
     <div className="mx-auto max-w-6xl p-4 md:p-8 text-slate-900">
       <header className="mb-6 md:mb-8">
         <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-slate-900">Savings & ROI Calculator</h1>
-        <p className="text-slate-600 mt-2 max-w-2xl">Model savings across contracts, voice, Wi-Fi, access control, cloud licensing, and mobility. Toggle per-unit or flat pricing, add one-time costs, and see payback and ROI instantly.</p>
+        <p className="text-slate-600 mt-2 max-w-2xl">Model savings across contracts, voice, Wi‑Fi, access control, cloud licensing, and mobility. Toggle per-unit or flat pricing, add one-time costs, and see payback and ROI instantly.</p>
       </header>
 
       <div className="flex items-center gap-3 mb-6">
@@ -282,7 +296,19 @@ function SummaryTile({label, value, highlight=false}:{label:string; value:string
   );
 }
 
-function ExportButtons({data, totals}:{data:Record<CategoryKey, CategoryInputs>, totals:any}){
+// ---------- Export (CSV/JSON) ----------
+// Add a proper type for totals to satisfy ESLint's no-explicit-any rule
+
+type Totals = {
+  current: number;
+  proposed: number;
+  monthlySavings: number;
+  annualSavings: number;
+  lifetimeSavings: number;
+  oneTime: number;
+};
+
+function ExportButtons({data, totals}:{data:Record<CategoryKey, CategoryInputs>, totals: Totals}){
   const toCSV = () => {
     const rows = [
       ["Category","Mode","Units","Current","Proposed","Monthly Savings","Annual Savings","Term Months","Lifetime Savings","One-time Cost"],
@@ -302,7 +328,7 @@ function ExportButtons({data, totals}:{data:Record<CategoryKey, CategoryInputs>,
           i.oneTimeCost,
         ];
       }),
-      ["TOTALS","","","", "", totals.monthlySavings, totals.annualSavings, "", totals.lifetimeSavings, totals.oneTime],
+      ["TOTALS","","","", "", (totals.monthlySavings).toString(), (totals.annualSavings).toString(), "", (totals.lifetimeSavings).toString(), (totals.oneTime).toString()],
     ];
     const csv = rows.map(r=> r.join(",")).join("\n");
     const blob = new Blob([csv],{type:"text/csv;charset=utf-8;"});
@@ -329,3 +355,4 @@ function ExportButtons({data, totals}:{data:Record<CategoryKey, CategoryInputs>,
     </div>
   );
 }
+
