@@ -310,8 +310,13 @@ export default function CostSavingsCalculator(){
 
   // auto-resize for iframe embeds
   useEffect(()=>{
-    if (typeof window === "undefined" || !(window as any).ResizeObserver) return;
-    const ro = new (window as any).ResizeObserver(()=>{
+    if (typeof window === "undefined") return;
+    interface WinWithRO extends Window {
+      ResizeObserver?: new (callback: ResizeObserverCallback) => ResizeObserver;
+    }
+    const w = window as WinWithRO;
+    if (!w.ResizeObserver) return;
+    const ro = new w.ResizeObserver(()=>{
       window.parent?.postMessage({ type: "calc-resize", height: document.body.scrollHeight }, "*");
     });
     ro.observe(document.body);
@@ -459,10 +464,5 @@ function SummaryTile({label, value, highlight=false}:{label:string; value:string
     </div>
   );
 }
-
-
-
-
-
 
 
