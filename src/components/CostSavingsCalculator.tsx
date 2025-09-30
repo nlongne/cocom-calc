@@ -1,21 +1,17 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, InputHTMLAttributes, LabelHTMLAttributes, ReactNode } from "react";
 import { Download, RefreshCw, ChevronRight, Calculator } from "lucide-react";
 import { PieChart, Pie, Tooltip, Cell, ResponsiveContainer } from "recharts";
 
 // ---- Minimal UI primitives (Tailwind + native) ----
-const Button = ({
-  children,
-  className = "",
-  variant,
-  onClick,
-}: {
-  children: React.ReactNode;
+interface ButtonProps {
+  children: ReactNode;
   className?: string;
-  variant?: "secondary" | undefined;
+  variant?: "secondary";
   onClick?: () => void;
-}) => (
+}
+const Button = ({ children, className = "", variant, onClick }: ButtonProps) => (
   <button
     onClick={onClick}
     className={
@@ -28,20 +24,18 @@ const Button = ({
   </button>
 );
 
-const Input = ({ className = "", ...props }: any) => (
-  <input
-    {...props}
-    className={`px-3 py-2 rounded-md border bg-white text-slate-900 ${className}`}
-  />
+const Input = (props: InputHTMLAttributes<HTMLInputElement> & { className?: string }) => (
+  <input {...props} className={`px-3 py-2 rounded-md border bg-white text-slate-900 ${props.className ?? ""}`} />
 );
 
-const Label = ({ htmlFor, className = "", children }: any) => (
+const Label = ({ htmlFor, className = "", children }: LabelHTMLAttributes<HTMLLabelElement> & { children: ReactNode }) => (
   <label htmlFor={htmlFor} className={`text-sm ${className}`}>
     {children}
   </label>
 );
 
-const Switch = ({ checked, onCheckedChange }: { checked: boolean; onCheckedChange: (b: boolean) => void }) => (
+interface SwitchProps { checked: boolean; onCheckedChange: (b: boolean) => void }
+const Switch = ({ checked, onCheckedChange }: SwitchProps) => (
   <button
     role="switch"
     aria-checked={checked}
@@ -56,26 +50,27 @@ const Switch = ({ checked, onCheckedChange }: { checked: boolean; onCheckedChang
   </button>
 );
 
-const Card = ({ className = "", children }: any) => (
+const Card = ({ className = "", children }: { className?: string; children: ReactNode }) => (
   <div className={`bg-white border border-slate-200 rounded-2xl ${className}`}>{children}</div>
 );
 
-const CardContent = ({ className = "", children }: any) => (
+const CardContent = ({ className = "", children }: { className?: string; children: ReactNode }) => (
   <div className={className}>{children}</div>
 );
 
 // Simple Accordion using <details>
-const Accordion = ({ children, className = "" }: any) => (
+const Accordion = ({ children, className = "" }: { children: ReactNode; className?: string }) => (
   <div className={className}>{children}</div>
 );
 
-const AccordionItem = ({ value, children, defaultOpen = true, className = "" }: any) => (
+interface AccordionItemProps { value?: string; children: ReactNode; defaultOpen?: boolean; className?: string }
+const AccordionItem = ({ value, children, defaultOpen = true, className = "" }: AccordionItemProps) => (
   <details className={`rounded-xl overflow-hidden ${className}`} open={defaultOpen} data-value={value}>
     {children}
   </details>
 );
 
-const AccordionTrigger = ({ className = "", children }: any) => (
+const AccordionTrigger = ({ className = "", children }: { className?: string; children: ReactNode }) => (
   <summary className={`flex items-center justify-between px-4 md:px-6 py-3 cursor-pointer select-none bg-white border-b border-slate-200 ${className}`}>
     <div className="flex items-center gap-3 text-left">
       <ChevronRight className="w-4 h-4 text-[#1C3256]" />
@@ -84,7 +79,7 @@ const AccordionTrigger = ({ className = "", children }: any) => (
   </summary>
 );
 
-const AccordionContent = ({ className = "", children }: any) => (
+const AccordionContent = ({ className = "", children }: { className?: string; children: ReactNode }) => (
   <div className={`px-0 ${className}`}>{children}</div>
 );
 
@@ -114,12 +109,12 @@ const CATEGORY_LABELS: Record<CategoryKey, string> = {
 
 // default inputs per category
 export type CategoryInputs = {
-  mode: "flat" | "perUnit"; // flat = monthly totals, perUnit = units * rate
-  units: number; // dwellings, seats, lines, devices, etc.
-  currentMonthly: number; // if mode=flat, total monthly; if perUnit, current rate per unit
-  proposedMonthly: number; // if mode=flat, total monthly; if perUnit, proposed rate per unit
-  oneTimeCost: number; // any upfront project cost
-  termMonths: number; // term to show lifetime savings
+  mode: "flat" | "perUnit";
+  units: number;
+  currentMonthly: number;
+  proposedMonthly: number;
+  oneTimeCost: number;
+  termMonths: number;
 };
 
 const DEFAULTS: Record<CategoryKey, CategoryInputs> = {
@@ -162,7 +157,7 @@ function NumberField({ id, label, value, onChange, min = 0, step = 1, suffix }: 
           step={step}
           min={min}
           value={Number.isFinite(value) ? value : 0}
-          onChange={(e: any) => onChange(parseFloat(e.target.value || "0"))}
+          onChange={(e) => onChange(parseFloat((e.target as HTMLInputElement).value || "0"))}
           className="bg-white border-slate-300 text-slate-900"
         />
         {suffix && <span className="text-slate-500 text-sm w-16">{suffix}</span>}
@@ -303,12 +298,11 @@ export default function CostSavingsCalculator() {
   return (
     <div className="cocom-root mx-auto max-w-5xl p-4 md:p-8 text-slate-900">
       <style jsx>{`
-        /* Prevent global styles (.prose, img/svg resets) from blowing up visuals */
         .cocom-root img { max-width: 100%; height: auto; }
         .cocom-root svg { width: auto; height: auto; max-width: none; }
-        /* Fix chart height explicitly so ResponsiveContainer has a parent size */
         .cocom-root .chart-wrap { height: 260px; }
       `}</style>
+
       <header className="mb-6 md:mb-8">
         <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-slate-900">Savings & ROI Calculator</h1>
         <p className="text-slate-600 mt-2 max-w-2xl">
@@ -354,7 +348,7 @@ export default function CostSavingsCalculator() {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(v: number) => currency(v)} contentStyle={{ background: "#ffffff", border: "1px solid #e5e7eb", color: "#0f172a" }} />
+                <Tooltip formatter={(v: number) => currency(v as number)} contentStyle={{ background: "#ffffff", border: "1px solid #e5e7eb", color: "#0f172a" }} />
               </PieChart>
             </ResponsiveContainer>
           ) : (
@@ -466,4 +460,3 @@ function ExportButtons({ data, totals }: { data: Record<CategoryKey, CategoryInp
     </div>
   );
 }
-
