@@ -806,6 +806,8 @@ export default function CostSavingsCalculator() {
   // UI
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-[#1C3256] text-white">
+      {/* Full-bleed background to cover the whole webpage, even outside this component's container */}
+      <div aria-hidden className="fixed inset-0 bg-[#1C3256] -z-10" />
       <div className="mx-auto max-w-6xl p-4 md:p-8 pb-12">
         {/* Header */}
         <header className="mb-2 md:mb-4 flex items-start justify-between gap-4">
