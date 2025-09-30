@@ -231,9 +231,9 @@ function ModeToggle({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs text-slate-500">Flat monthly</span>
+      <span className="text-xs text-white/80">Flat monthly</span>
       <Switch checked={checked} onCheckedChange={onCheckedChange} />
-      <span className="text-xs text-slate-500">Per-unit</span>
+      <span className="text-xs text-white/80">Per-unit</span>
     </div>
   );
 }
@@ -778,7 +778,7 @@ export default function CostSavingsCalculator() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl p-4 md:p-8 pb-12 text-slate-900 bg-gradient-to-b from-white to-slate-50 rounded-2xl">
+    <div className="mx-auto max-w-6xl p-4 md:p-8 pb-12 text-slate-900 bg-white rounded-2xl">
       {/* Header */}
       <header className="mb-2 md:mb-4 flex items-start justify-between gap-4">
         <div>
@@ -792,196 +792,197 @@ export default function CostSavingsCalculator() {
         </a>
       </header>
 
-      {/* Simple / Advanced toggle (visual only) */}
-      <div className="flex justify-end mb-4">
-        <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-full p-1">
-          <button
-            onClick={() => setView("simple")}
-            className={`px-3 py-1 text-xs rounded-full ${
-              view === "simple" ? "bg-[#1C3256] text-white" : "text-slate-700 hover:bg-slate-50"
-            }`}
-          >
-            Simple
-          </button>
-          <button
-            onClick={() => setView("advanced")}
-            className={`px-3 py-1 text-xs rounded-full ${
-              view === "advanced" ? "bg-[#1C3256] text-white" : "text-slate-700 hover:bg-slate-50"
-            }`}
-          >
-            Advanced
-          </button>
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="flex items-center gap-3 mb-6">
-        <Button
-          variant="secondary"
-          className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
-          onClick={clearAll}
-        >
-          <RefreshCw className="w-4 h-4 mr-2" /> Clear (zeros)
-        </Button>
-        <Button onClick={loadDemo} className="bg-[#1C3256] text-white hover:opacity-90 hover:text-white">
-          <Calculator className="w-4 h-4 mr-2" /> Load demo
-        </Button>
-      </div>
-
-      {/* Category tabs with annual badges */}
-      <div className="mt-1 mb-4 flex flex-wrap gap-2">
-        {(Object.keys(CATEGORY_LABELS) as CategoryKey[]).map((k) => (
-          <button
-            key={k}
-            onClick={() => setActive(k)}
-            className={`px-3 py-1.5 rounded-full text-sm border flex items-center gap-2 ${
-              active === k
-                ? "bg-[#1C3256] text-white border-[#1C3256]"
-                : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
-            }`}
-          >
-            <span>{CATEGORY_LABELS[k]}</span>
-            <span
-              className={`text[11px] px-1.5 py-0.5 rounded ${
-                active === k ? "bg-white/20" : "bg-slate-100 text-slate-600"
+      {/* CALCULATOR WRAPPER: blue panel for contrast */}
+      <section className="rounded-2xl bg-[#1C3256] text-white p-4 md:p-6 lg:p-8 shadow-md">
+        {/* Simple / Advanced toggle (visual only) */}
+        <div className="flex justify-end mb-4">
+          <div className="flex items-center gap-1 bg-white/10 border border-white/20 rounded-full p-1">
+            <button
+              onClick={() => setView("simple")}
+              className={`px-3 py-1 text-xs rounded-full ${
+                view === "simple" ? "bg-white text-[#1C3256]" : "text-white hover:bg-white/10"
               }`}
             >
-              {currency(pillAnnual[k] || 0)}
-            </span>
-          </button>
-        ))}
-      </div>
-
-      {/* Active category card */}
-      <CategoryCard
-        k={active}
-        inputs={data[active]}
-        onChange={(next) => setData((d) => ({ ...d, [active]: next }))}
-      />
-
-      {/* Totals & chart controls */}
-      <div className="mt-6 mb-2 flex items-center gap-3 text-sm text-slate-600">
-        <span>Totals & chart:</span>
-        <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-full p-1">
-          <button
-            onClick={() => setScope("all")}
-            className={`px-3 py-1 text-xs rounded-full ${
-              scope === "all" ? "bg-[#1C3256] text-white" : "text-slate-700 hover:bg-slate-50"
-            }`}
-          >
-            All categories
-          </button>
-          <button
-            onClick={() => setScope("selected")}
-            className={`px-3 py-1 text-xs rounded-full ${
-              scope === "selected"
-                ? "bg-[#1C3256] text-white"
-                : "text-slate-700 hover:bg-slate-50"
-            }`}
-          >
-            Selected only
-          </button>
-        </div>
-      </div>
-
-      {/* Totals grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-xl border p-4 bg-white border-slate-200">
-          <p className="text-xs text-slate-500">Current monthly</p>
-          <p className="text-xl font-semibold text-slate-900">{currency(totals.current)}</p>
-        </div>
-        <div className="rounded-xl border p-4 bg-white border-slate-200">
-          <p className="text-xs text-slate-500">Proposed monthly</p>
-          <p className="text-xl font-semibold text-slate-900">{currency(totals.proposed)}</p>
-        </div>
-        <div className="rounded-xl border p-4 bg-[#e6ecf5] border-[#b9c6db]">
-          <p className="text-xs" style={{ color: BRAND.blue }}>
-            Monthly savings
-          </p>
-          <p className="text-xl font-semibold" style={{ color: BRAND.blue }}>
-            {currency(totals.monthlySavings)}
-          </p>
-        </div>
-        <div className="rounded-xl border p-4 bg-[#e6ecf5] border-[#b9c6db]">
-          <p className="text-xs" style={{ color: BRAND.blue }}>
-            Annual savings
-          </p>
-          <p className="text-xl font-semibold" style={{ color: BRAND.blue }}>
-            {currency(totals.annualSavings)}
-          </p>
-        </div>
-        <div className="rounded-xl border p-4 bg-white border-slate-200">
-          <p className="text-xs text-slate-500">Lifetime (term)</p>
-          <p className="text-xl font-semibold text-slate-900">
-            {totals.lifetimeSavings > 0 ? currency(totals.lifetimeSavings) : "—"}
-          </p>
-        </div>
-        <div className="rounded-xl border p-4 bg-white border-slate-200">
-          <p className="text-xs text-slate-500">One-time costs</p>
-          <p className="text-xl font-semibold text-slate-900">{currency(totals.oneTime)}</p>
-        </div>
-      </div>
-
-      {/* Chart BELOW numbers */}
-      <div className="mt-4 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm relative h-80">
-        <h3 className="text-sm text-slate-600 mb-2">Annual savings by category</h3>
-        {chartData.length ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie dataKey="value" data={chartData} outerRadius={110} innerRadius={60} paddingAngle={3}>
-                {chartData.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(v: number) => currency(v as number)} />
-            </PieChart>
-          </ResponsiveContainer>
-        ) : (
-          <div className="flex h-full items-center justify-center text-slate-500 text-sm">
-            Enter values to see the chart
-          </div>
-        )}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-xs text-slate-500">Total annual</div>
-            <div className="text-lg font-semibold text-slate-800">{currency(totals.annualSavings)}</div>
+              Simple
+            </button>
+            <button
+              onClick={() => setView("advanced")}
+              className={`px-3 py-1 text-xs rounded-full ${
+                view === "advanced" ? "bg-white text-[#1C3256]" : "text-white hover:bg-white/10"
+              }`}
+            >
+              Advanced
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Net savings after CoCom fee */}
-      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <p className="text-xs text-slate-600">Your Net Savings (after CoCom fee)</p>
-        <p className="text-2xl font-semibold" style={{ color: BRAND.blue }}>
-          {currency(coCom.net)}
-        </p>
-        <p className="text-[12px] text-slate-500 mt-1">
-          CoCom fee = 30% of annual savings <em>(excluding door‑fee benefits)</em> + bulk agreement fee (ISP, if any).
-        </p>
-        <p className="text-[12px] text-slate-500">
-          Based on {currency(coCom.baseAnnual)} annual savings (excl. door‑fee benefits)
-          {coCom.bulkFee > 0 ? `, plus ${currency(coCom.bulkFee)} one‑time bulk agreement fee (ISP)` : ""}.
-        </p>
-        <p className="text-[12px] text-slate-500">
-          Estimated CoCom fee today: <span className="font-medium text-slate-700">{currency(coCom.fee)}</span>
-        </p>
-      </div>
-
-      {/* Bottom CTA (non-sticky) */}
-      <div className="mt-8">
-        <div className="rounded-2xl shadow-sm border border-slate-200 bg-white p-3 md:p-4 flex items-center justify-between gap-4">
-          <div className="text-sm md:text-base text-slate-700">
-            Want us to validate these savings for your portfolio? We’ll review bills, contracts, and usage to firm up the ROI.
-          </div>
-          <a
-            href="https://www.cocompartners.com/contact"
-            className="whitespace-nowrap inline-flex items-center justify-center rounded-xl px-4 py-2 text-white"
-            style={{ background: BRAND.blue }}
+        {/* Actions */}
+        <div className="flex items-center gap-3 mb-6">
+          <Button
+            variant="secondary"
+            className="bg-white text-[#1C3256] border border-white hover:bg-white/90"
+            onClick={clearAll}
           >
-            Schedule a free audit
-          </a>
+            <RefreshCw className="w-4 h-4 mr-2" /> Clear (zeros)
+          </Button>
+          <Button onClick={loadDemo} className="bg-white text-[#1C3256] hover:bg-white/90">
+            <Calculator className="w-4 h-4 mr-2" /> Load demo
+          </Button>
         </div>
-      </div>
+
+        {/* Category tabs with annual badges */}
+        <div className="mt-1 mb-4 flex flex-wrap gap-2">
+          {(Object.keys(CATEGORY_LABELS) as CategoryKey[]).map((k) => (
+            <button
+              key={k}
+              onClick={() => setActive(k)}
+              className={`px-3 py-1.5 rounded-full text-sm border flex items-center gap-2 ${
+                active === k
+                  ? "bg-white text-[#1C3256] border-white"
+                  : "bg-white/10 text-white border-white/20 hover:bg-white/15"
+              }`}
+            >
+              <span>{CATEGORY_LABELS[k]}</span>
+              <span
+                className={`text-[11px] px-1.5 py-0.5 rounded ${
+                  active === k ? "bg-[#1C3256]/10 text-[#1C3256]" : "bg-white/20 text-white"
+                }`}
+              >
+                {currency(pillAnnual[k] || 0)}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Active category card (kept white for readability) */}
+        <CategoryCard
+          k={active}
+          inputs={data[active]}
+          onChange={(next) => setData((d) => ({ ...d, [active]: next }))}
+        />
+
+        {/* Totals & chart controls */}
+        <div className="mt-6 mb-2 flex items-center gap-3 text-sm text-white/90">
+          <span>Totals & chart:</span>
+          <div className="flex items-center gap-1 bg-white/10 border border-white/20 rounded-full p-1">
+            <button
+              onClick={() => setScope("all")}
+              className={`px-3 py-1 text-xs rounded-full ${
+                scope === "all" ? "bg-white text-[#1C3256]" : "text-white hover:bg-white/10"
+              }`}
+            >
+              All categories
+            </button>
+            <button
+              onClick={() => setScope("selected")}
+              className={`px-3 py-1 text-xs rounded-full ${
+                scope === "selected" ? "bg-white text-[#1C3256]" : "text-white hover:bg-white/10"
+              }`}
+            >
+              Selected only
+            </button>
+          </div>
+        </div>
+
+        {/* Totals grid */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="rounded-xl border p-4 bg-white border-white/40">
+            <p className="text-xs text-slate-500">Current monthly</p>
+            <p className="text-xl font-semibold text-slate-900">{currency(totals.current)}</p>
+          </div>
+          <div className="rounded-xl border p-4 bg-white border-white/40">
+            <p className="text-xs text-slate-500">Proposed monthly</p>
+            <p className="text-xl font-semibold text-slate-900">{currency(totals.proposed)}</p>
+          </div>
+          <div className="rounded-xl border p-4 bg-[#e6ecf5] border-[#b9c6db]">
+            <p className="text-xs" style={{ color: BRAND.blue }}>
+              Monthly savings
+            </p>
+            <p className="text-xl font-semibold" style={{ color: BRAND.blue }}>
+              {currency(totals.monthlySavings)}
+            </p>
+          </div>
+          <div className="rounded-xl border p-4 bg-[#e6ecf5] border-[#b9c6db]">
+            <p className="text-xs" style={{ color: BRAND.blue }}>
+              Annual savings
+            </p>
+            <p className="text-xl font-semibold" style={{ color: BRAND.blue }}>
+              {currency(totals.annualSavings)}
+            </p>
+          </div>
+          <div className="rounded-xl border p-4 bg-white border-white/40">
+            <p className="text-xs text-slate-500">Lifetime (term)</p>
+            <p className="text-xl font-semibold text-slate-900">
+              {totals.lifetimeSavings > 0 ? currency(totals.lifetimeSavings) : "—"}
+            </p>
+          </div>
+          <div className="rounded-xl border p-4 bg-white border-white/40">
+            <p className="text-xs text-slate-500">One-time costs</p>
+            <p className="text-xl font-semibold text-slate-900">{currency(totals.oneTime)}</p>
+          </div>
+        </div>
+
+        {/* Chart BELOW numbers */}
+        <div className="mt-4 bg-white border border-white/40 rounded-2xl p-4 shadow-sm relative h-80">
+          <h3 className="text-sm text-slate-600 mb-2">Annual savings by category</h3>
+          {chartData.length ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie dataKey="value" data={chartData} outerRadius={110} innerRadius={60} paddingAngle={3}>
+                  {chartData.map((_, i) => (
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(v: number) => currency(v as number)} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex h-full items-center justify-center text-slate-500 text-sm">
+              Enter values to see the chart
+            </div>
+          )}
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-xs text-slate-500">Total annual</div>
+              <div className="text-lg font-semibold text-slate-800">{currency(totals.annualSavings)}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Net savings after CoCom fee */}
+        <div className="mt-4 rounded-2xl border border-white/40 bg-white p-4 shadow-sm">
+          <p className="text-xs text-slate-600">Your Net Savings (after CoCom fee)</p>
+          <p className="text-2xl font-semibold" style={{ color: BRAND.blue }}>
+            {currency(coCom.net)}
+          </p>
+          <p className="text-[12px] text-slate-500 mt-1">
+            CoCom fee = 30% of annual savings <em>(excluding door‑fee benefits)</em> + bulk agreement fee (ISP, if any).
+          </p>
+          <p className="text-[12px] text-slate-500">
+            Based on {currency(coCom.baseAnnual)} annual savings (excl. door‑fee benefits)
+            {coCom.bulkFee > 0 ? `, plus ${currency(coCom.bulkFee)} one‑time bulk agreement fee (ISP)` : ""}.
+          </p>
+          <p className="text-[12px] text-slate-500">
+            Estimated CoCom fee today: <span className="font-medium text-slate-700">{currency(coCom.fee)}</span>
+          </p>
+        </div>
+
+        {/* Bottom CTA (non-sticky) */}
+        <div className="mt-8">
+          <div className="rounded-2xl shadow-sm border border-white/30 bg-white p-3 md:p-4 flex items-center justify-between gap-4">
+            <div className="text-sm md:text-base text-slate-700">
+              Want us to validate these savings for your portfolio? We’ll review bills, contracts, and usage to firm up the ROI.
+            </div>
+            <a
+              href="https://www.cocompartners.com/contact"
+              className="whitespace-nowrap inline-flex items-center justify-center rounded-xl px-4 py-2 text-white"
+              style={{ background: BRAND.blue }}
+            >
+              Schedule a free audit
+            </a>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
