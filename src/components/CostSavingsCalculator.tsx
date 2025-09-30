@@ -91,7 +91,7 @@ type Rule = {
   fixed?: Partial<Pick<CategoryInputs, "proposedMonthly"|"oneTimeCost"|"termMonths"|"units">>;
   hide?: Partial<Record<"proposedMonthly"|"oneTimeCost"|"termMonths"|"units"|"mode", boolean>>;
 };
-const CATEGORY_RULES: Record<CategoryKey, Rule> = {
+const CATEGORY_RULES: Partial<Record<CategoryKey, Rule>> = {
   isp:  { forceMode:"perUnit", fixed:{ proposedMonthly:32, oneTimeCost:5000, termMonths:0 }, hide:{ termMonths:true, oneTimeCost:true, mode:true } },
   voip: { forceMode:"flat", fixed:{ proposedMonthly:30 } },
 };
@@ -464,5 +464,7 @@ function SummaryTile({label, value, highlight=false}:{label:string; value:string
     </div>
   );
 }
+
+
 
 
