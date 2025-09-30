@@ -362,7 +362,7 @@ export default function CostSavingsCalculator(){
           <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-slate-900">CoCom Savings & ROI Calculator</h1>
           <p className="text-slate-600 mt-2 max-w-2xl">Model CoCom savings across contracts, voice, Wi‑Fi, access control, cloud licensing, and mobility. Toggle per‑unit or flat pricing, add one‑time costs, and see CoCom payback and ROI instantly.</p>
         </div>
-        <a href="https://cocompartners.com" target="_blank" rel="noopener noreferrer" className="shrink-0">
+        <a href="https://cocompartners.com" className="shrink-0">
           <img src={LOGO_SRC} alt="CoCom logo" className="h-12 md:h-32 lg:h-40 w-auto opacity-90" />
         </a>
       </header>
@@ -464,9 +464,5 @@ function SummaryTile({label, value, highlight=false}:{label:string; value:string
     </div>
   );
 }
-
-
-
-
 
 
