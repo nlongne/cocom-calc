@@ -372,7 +372,7 @@ export default function CostSavingsCalculator(){
           <Button variant="secondary" className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50" onClick={clearAll}>
             <RefreshCw className="w-4 h-4 mr-2"/> Clear (zeros)
           </Button>
-          <Button onClick={loadDemo} className="bg-[#1C3256] hover:opacity-90">
+          <Button onClick={loadDemo} className="bg-[#1C3256] text-white hover:opacity-90 hover:text-white">
             <Calculator className="w-4 h-4 mr-2"/> Load demo
           </Button>
         </div>
@@ -464,6 +464,8 @@ function SummaryTile({label, value, highlight=false}:{label:string; value:string
     </div>
   );
 }
+
+
 
 
 
