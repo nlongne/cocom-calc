@@ -778,22 +778,23 @@ export default function CostSavingsCalculator() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl p-4 md:p-8 pb-12 text-slate-900 bg-white rounded-2xl">
+    <div className="min-h-screen w-full overflow-x-hidden bg-[#1C3256] text-white">
+      <div className="mx-auto max-w-6xl p-4 md:p-8 pb-12">
       {/* Header */}
       <header className="mb-2 md:mb-4 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-slate-900">CoCom Savings & ROI Calculator</h1>
-          <p className="text-slate-600 mt-2 max-w-2xl">
+          <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white">CoCom Savings & ROI Calculator</h1>
+          <p className="text-white/80 mt-2 max-w-2xl">
             Model CoCom savings across ISP bulk service, VoIP/POTS, Business Internet, and mobility. Toggle per‑unit or flat pricing, add one‑time costs, and see CoCom payback and ROI instantly.
           </p>
         </div>
         <a href="https://cocompartners.com" className="shrink-0">
-          <img src={LOGO_SRC} alt="CoCom logo" className="h-12 md:h-32 lg:h-40 w-auto opacity-90" />
+          <img src={LOGO_SRC} alt="CoCom logo" className="h-20 md:h-44 lg:h-56 w-auto opacity-90" />
         </a>
       </header>
 
       {/* CALCULATOR WRAPPER: blue panel for contrast */}
-      <section className="rounded-2xl bg-[#1C3256] text-white p-4 md:p-6 lg:p-8 shadow-md">
+      <section className="rounded-2xl bg-transparent text-inherit p-4 md:p-6 lg:p-8 shadow-none">
         {/* Simple / Advanced toggle (visual only) */}
         <div className="flex justify-end mb-4">
           <div className="flex items-center gap-1 bg-white/10 border border-white/20 rounded-full p-1">
@@ -923,7 +924,7 @@ export default function CostSavingsCalculator() {
         </div>
 
         {/* Chart BELOW numbers */}
-        <div className="mt-4 bg-white border border-white/40 rounded-2xl p-4 shadow-sm relative h-80">
+        <div className="mt-4 min-w-0 bg-white border border-white/40 rounded-2xl p-4 shadow-sm relative h-80">
           <h3 className="text-sm text-slate-600 mb-2">Annual savings by category</h3>
           {chartData.length ? (
             <ResponsiveContainer width="100%" height="100%">
@@ -984,5 +985,6 @@ export default function CostSavingsCalculator() {
         </div>
       </section>
     </div>
+  </div>
   );
 }
