@@ -20,6 +20,14 @@ const currency = (n: number) =>
   });
 const pct = (n: number) => `${(Math.max(0, Math.min(1, n || 0)) * 100).toFixed(1)}%`;
 
+// Styled Switch with brand colors (unchecked = light blue, checked = brand blue)
+const StyledSwitch = (props: React.ComponentProps<typeof Switch>) => (
+  <Switch
+    {...props}
+    className={"bg-[#c5d6ec] data-[state=checked]:bg-[#1C3256]"}
+  />
+);
+
 function InfoTip({ text }: { text: string }) {
   return (
     <button
@@ -232,7 +240,7 @@ function ModeToggle({
   return (
     <div className="flex items-center gap-3">
       <span className="text-xs text-slate-500">Flat monthly</span>
-      <Switch checked={checked} onCheckedChange={onCheckedChange} />
+      <StyledSwitch checked={checked} onCheckedChange={onCheckedChange} />
       <span className="text-xs text-slate-500">Per-unit</span>
     </div>
   );
@@ -278,7 +286,7 @@ function NumberField({
             onChange(Math.max(0, parseFloat(e.currentTarget.value || "0")))
           }
           disabled={disabled}
-          className={`${prefix ? "pl-7" : ""} ${suffix ? "pr-14" : ""}`}
+          className={`text-slate-900 placeholder:text-slate-400 ${prefix ? "pl-7" : ""} ${suffix ? "pr-14" : ""}`}
         />
         {suffix && (
           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
@@ -322,7 +330,7 @@ function CategoryCard({
             </div>
             <div className="flex items-center gap-2">
               <Label className="text-xs text-slate-500">Include in totals</Label>
-              <Switch
+              <StyledSwitch
                 checked={inputs.enabled}
                 onCheckedChange={(b) => onChange({ ...inputs, enabled: b })}
               />
@@ -395,7 +403,7 @@ function CategoryCard({
                     <InfoTip text="If enabled, proposed becomes $0; otherwise $120/mo." />
                   </span>
                 </div>
-                <Switch
+                <StyledSwitch
                   checked={!!inputs.bulkAgreement}
                   onCheckedChange={(b) =>
                     onChange(
@@ -739,10 +747,25 @@ export default function CostSavingsCalculator() {
     console.assert(k2.doorBenefit === 1000, "Test2 doorBenefit should be 1000");
     console.assert(Number.isFinite(k2.roi) === false, "Test2 ROI should be Infinity when oneTimeCost=0 & annual>0");
 
-    // Test 3: reduction calc
+    // Test 3: reduction calc (flat)
     const t3: CategoryInputs = { mode: "flat", units: 0, currentMonthly: 200, proposedMonthly: 100, oneTimeCost: 0, termMonths: 0, enabled: true };
     const k3 = computeKPIs(t3);
     console.assert(Math.abs(k3.reduction - 0.5) < 1e-9, "Test3 reduction should be 0.5");
+
+    // Test 4: voip unused -> proposed becomes 0
+    const t4: CategoryInputs = { mode: "perUnit", units: 0, currentMonthly: 0, proposedMonthly: 30, oneTimeCost: 0, termMonths: 0, enabled: true };
+    const k4 = computeKPIs(normalizeForComputation("voip", t4));
+    console.assert(k4.proposed === 0, "Test4 voip proposed should be 0 when unused");
+
+    // Test 5: biznet bulkAgreement true -> proposed 0
+    const t5: CategoryInputs = { mode: "flat", units: 1, currentMonthly: 350, proposedMonthly: 120, oneTimeCost: 0, termMonths: 0, enabled: true, bulkAgreement: true };
+    const k5 = computeKPIs(normalizeForComputation("biznet", t5));
+    console.assert(k5.proposed === 0, "Test5 biznet proposed should be 0 with bulkAgreement");
+
+    // Test 6: isp current -> oneTimeCost applied (affects ROI denominator)
+    const t6: CategoryInputs = { mode: "perUnit", units: 10, currentMonthly: 55, proposedMonthly: 32, oneTimeCost: 0, termMonths: 0, enabled: true, ispMode: "current" };
+    const norm6 = normalizeForComputation("isp", t6);
+    console.assert(norm6.oneTimeCost === 5000, "Test6 ISP current should apply 5000 project fee");
   }, []);
 
   // Aggregates
@@ -830,7 +853,7 @@ export default function CostSavingsCalculator() {
               <button
                 onClick={() => setView("simple")}
                 className={`px-3 py-1 text-xs rounded-full ${
-                  view === "simple" ? "bg-white text-[#1C3256]" : "text-white hover:bg-white/10"
+                  view === "simple" ? "bg-white text-[#1C3256]" : "text-white hover:bg白/10"
                 }`}
               >
                 Simple
@@ -850,7 +873,7 @@ export default function CostSavingsCalculator() {
           <div className="flex items-center gap-3 mb-6">
             <Button
               variant="secondary"
-              className="bg-white text-[#1C3256] border border-white hover:bg-white/90"
+              className="bg白 text-[#1C3256] border border-white hover:bg-white/90"
               onClick={() => {
                 setData(ZERO_DEFAULTS);
                 if (typeof window !== "undefined")
@@ -965,35 +988,37 @@ export default function CostSavingsCalculator() {
               </div>
 
               {/* Chart BELOW numbers */}
-              <div className="mt-4 min-w-0 bg-white border border-white/40 rounded-2xl p-4 shadow-sm relative h-80">
+              <div className="mt-4 min-w-0 bg-white border border-white/40 rounded-2xl p-4 shadow-sm">
                 <h3 className="text-sm text-slate-600 mb-2">Annual savings by category</h3>
-                {chartData.length ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        dataKey="value"
-                        data={chartData}
-                        outerRadius={110}
-                        innerRadius={60}
-                        paddingAngle={3}
-                      >
-                        {chartData.map((_, i) => (
-                          <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(v: number) => currency(v as number)} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex h-full items-center justify-center text-slate-500 text-sm">
-                    Enter values to see the chart
-                  </div>
-                )}
-                {/* Centered totals overlay */}
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-xs text-slate-500">Total annual</div>
-                    <div className="text-2xl font-bold text-slate-800">{currency(totals.annualSavings)}</div>
+                <div className="relative h-72">
+                  {chartData.length ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          dataKey="value"
+                          data={chartData}
+                          outerRadius={110}
+                          innerRadius={60}
+                          paddingAngle={3}
+                        >
+                          {chartData.map((_, i) => (
+                            <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(v: number) => currency(v as number)} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-slate-500 text-sm">
+                      Enter values to see the chart
+                    </div>
+                  )}
+                  {/* Centered totals overlay */}
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-xs text-slate-500">Total annual</div>
+                      <div className="text-2xl font-bold text-slate-800">{currency(totals.annualSavings)}</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1038,3 +1063,4 @@ export default function CostSavingsCalculator() {
     </div>
   );
 }
+
