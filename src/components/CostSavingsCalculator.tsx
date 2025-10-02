@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { RefreshCw, Calculator, Info } from "lucide-react";
+import { Source_Sans_3 } from "next/font/google";
 import { PieChart, Pie, Tooltip, Cell, ResponsiveContainer } from "recharts";
 
 // ===== Brand & helpers =====
@@ -682,7 +683,7 @@ export default function CostSavingsCalculator() {
   });
   const [active, setActive] = useState<CategoryKey>("isp");
   const [scope, setScope] = useState<"all" | "selected">("all");
-  const [view, setView] = useState<"simple" | "advanced">("advanced"); // visual only: advanced reveals totals/chart
+  const [view, setView] = useState<"simple" | "advanced">("simple"); // visual only: advanced reveals totals/chart
 
   // Effects (persist, URL sync, resize msg)
   useEffect(() => {
@@ -841,7 +842,7 @@ export default function CostSavingsCalculator() {
             </p>
           </div>
           <a href="https://cocompartners.com" className="shrink-0">
-            <img src={LOGO_SRC} alt="CoCom logo" className="h-20 md:h-44 lg:h-56 w-auto opacity-90" />
+            <img src={LOGO_SRC} alt="CoCom logo" className="h-30 md:h-60 lg:h-60 w-auto opacity-90" />
           </a>
         </header>
 
@@ -872,8 +873,7 @@ export default function CostSavingsCalculator() {
           {/* Actions */}
           <div className="flex items-center gap-3 mb-6">
             <Button
-              variant="secondary"
-              className="bg白 text-[#1C3256] border border-white hover:bg-white/90"
+              className="bg-white text-[#1C3256] hover:bg-white/90"
               onClick={() => {
                 setData(ZERO_DEFAULTS);
                 if (typeof window !== "undefined")
