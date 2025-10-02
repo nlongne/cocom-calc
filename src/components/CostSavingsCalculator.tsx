@@ -842,7 +842,7 @@ export default function CostSavingsCalculator() {
             </p>
           </div>
           <a href="https://cocompartners.com" className="shrink-0">
-            <img src={LOGO_SRC} alt="CoCom logo" className="h-30 md:h-60 lg:h-60 w-auto opacity-90" />
+            <img src={LOGO_SRC} alt="CoCom logo" className="h-12 sm:h-16 md:h-24 lg:h-32 w-auto opacity-90" />
           </a>
         </header>
 
